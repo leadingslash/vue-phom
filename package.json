@@ -1,0 +1,47 @@
+{
+	"name": "vue-phom",
+	"version": "0.1.0",
+	"description": "",
+	"scripts": {
+		"build": "rimraf dist && unbuild",
+		"dev": "./scripts/dev_app.sh",
+		"lint": "eslint . --ext .vue,.ts,.tsx",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Dr.Yami",
+	"license": "TBD",
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"require": "./dist/index.cjs",
+			"import": "./dist/index.mjs",
+			"types": "./dist/index.d.ts"
+		},
+		"./*": "./*"
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": false,
+	"devDependencies": {
+		"@rushstack/eslint-patch": "^1.1.1",
+		"@types/lodash-es": "^4.17.6",
+		"@vue/eslint-config-prettier": "^7.0.0",
+		"@vue/eslint-config-typescript": "^10.0.0",
+		"eslint": "^8.5.0",
+		"eslint-plugin-vue": "^8.5.0",
+		"prettier": "^2.5.1",
+		"rimraf": "^3.0.2",
+		"typescript": "^4.6.3",
+		"unbuild": "^0.7.2",
+		"vite": "^2.8.6",
+		"vitest": "^0.8.4",
+		"vue": "^3.2.31"
+	},
+	"peerDependencies": {
+		"vue": "^3.2.31"
+	},
+	"dependencies": {}
+}
