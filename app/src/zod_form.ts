@@ -1,7 +1,6 @@
-import { set } from 'lodash-es'
 import { z as zod } from 'zod'
 
-import { useForm, type Options as FormOptions, type ValidationErrors } from '../../src'
+import { useForm, type Options as FormOptions, type ValidationError } from '../../src'
 
 type Options<TData extends Record<string, unknown>, TDefaultData extends TData = TData> = Omit<
 	FormOptions<TData, TDefaultData>,
@@ -22,13 +21,13 @@ export const useZodForm = <
 			return null
 		}
 		const errors = parseData.error.errors
-		const result: ValidationErrors<TData> = {}
+		const result: Record<string, ValidationError> = {}
 
 		for (const error of errors) {
-			set(result, error.path, {
+			result[error.path.join('.')] = {
 				code: error.code,
 				message: error.message,
-			})
+			}
 		}
 
 		return result

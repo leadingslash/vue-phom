@@ -14,7 +14,7 @@ type ValidateType = 'submit' | 'change' | 'blur'
 type AnyDataType = Record<string, unknown>
 export type ValidationResolver<TData extends AnyDataType> = (
 	data: TData,
-) => Promise<ValidationErrors<TData> | null> | ValidationErrors<TData> | null
+) => Promise<Record<string, ValidationError> | null> | Record<string, ValidationError> | null
 
 export interface Options<TData extends AnyDataType, TDefaultData extends TData = TData> {
 	defaultValues?: DeepPartial<TDefaultData>
@@ -39,7 +39,10 @@ export type ValidationErrors<
 	TData extends AnyDataType,
 	TPath extends Path<TData> = Path<TData>,
 > = Partial<
-	Record<Path<TData>, TData[TPath] extends Array<any> ? ValidationError[] : ValidationError>
+	Record<
+		Path<TData>,
+		PathValue<TData, TPath> extends Array<any> ? ValidationError[] : ValidationError
+	>
 >
 
 export const useForm = <TData extends AnyDataType, TDefaultData extends TData = TData>(
@@ -117,6 +120,7 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			const validateErrors = await validation(data)
 			if (validateErrors) {
 				errors.value = validateErrors
+				console.log(errors.value)
 				return false
 			} else {
 				errors.value = {}
@@ -202,7 +206,7 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 	}
 
 	const useError = <TPath extends Path<TData>>(path: TPath) => {
-		return computed<ValidationErrors<TData, TPath>[TPath]>(() => get(unref(errors), path, null))
+		return computed<ValidationErrors<TData, TPath>[TPath]>(() => unref(errors)[path] ?? null)
 	}
 
 	const useArrayField = <TPath extends Path<TData>>(path: TPath) => {
