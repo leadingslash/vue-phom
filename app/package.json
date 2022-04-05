@@ -8,7 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.25"
+    "lodash-es": "^4.17.21",
+    "vue": "^3.2.25",
+    "zod": "^3.14.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.0",

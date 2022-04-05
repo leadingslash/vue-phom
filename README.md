@@ -60,7 +60,46 @@ const appendHandler = () => {
         </div>
         <div><button @click.prevent="appendHandler">appendHandler</button></div>
 
-        <button type="submit">Submit</button>
+        <button type="submit" :disabled="formState.isSubmitting">Submit</button>
     </form>
 </template>
+```
+
+
+## Validation
+Check `app/src/zod_form.ts` for validation implementation.
+
+```vue
+<script setup lang="ts">
+import { useZodForm } from './zod_form'
+import { z } from 'zod'
+
+const schema = z.object({
+    name: z.string().min(4),
+    age: z.number().min(18),
+})
+
+const { useField, useError, handleSubmit, formState } = useZodForm(schema)
+
+const nameError = useError('name')
+const ageError = useError('age')
+
+const submit = handleSubmit((data) => console.log(data))
+</script>
+
+<template>
+    <form @submit.prevent="submit">
+        <div>
+            <input type="text" v-bind="useField('name')" />
+            <span v-if="nameError">{{ nameError.message }}</span>
+        </div>
+        <div>
+            <input type="number" v-bind="useField('age', { toNumber: true })" />
+            <span v-if="ageError">{{ ageError.message }}</span>
+        </div>
+
+        <button type="submit" :disabled="formState.isSubmitting">Submit</button>
+    </form>
+</template>
+
 ```

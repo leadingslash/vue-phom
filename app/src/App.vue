@@ -45,6 +45,6 @@ const appendHandler = () => {
 		</div>
 		<div><button @click.prevent="appendHandler">appendHandler</button></div>
 
-		<button type="submit">Submit</button>
+		<button type="submit" :disabled="formState.isSubmitting">Submit</button>
 	</form>
 </template>

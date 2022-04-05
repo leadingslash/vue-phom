@@ -201,9 +201,7 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 		})
 	}
 
-	const useError = <TPath extends Path<TData>>(
-		path: TPath,
-	): WritableComputedRef<ValidationErrors<TData, TPath>[TPath]> => {
+	const useError = <TPath extends Path<TData>>(path: TPath) => {
 		return computed<ValidationErrors<TData, TPath>[TPath]>(() => get(unref(errors), path, null))
 	}
 
