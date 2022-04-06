@@ -7,9 +7,11 @@ import type { Path, PathValue } from './types/paths'
 import type { WritableComputedRef } from 'vue'
 import type { ArrayValue } from './types/common'
 import { debounce } from './utils/debounce'
+import { isCheckboxOrRadio } from './utils/input_type'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 type ValidateType = 'submit' | 'change' | 'blur'
+type InputType = 'text' | 'checkbox' | 'multiple-checkboxes'
 
 interface RegisterField<TData extends AnyDataType, TPath extends Path<TData>> {
 	value: PathValue<TData, TPath>
@@ -132,7 +134,6 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 	}
 
 	const dataRef = ref<TData>({ ...defaultValues } as TData)
-	const fieldRefs = shallowRef<Partial<Record<Path<TData>, any>>>({})
 
 	const getFieldModel = <TPath extends Path<TData>>(
 		path: TPath,
@@ -142,18 +143,35 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 		const field = computed<PathValue<TData, TPath>>({
 			get: () => get(unref(dataRef), path, null),
 			set: (value: any) => {
-				let finalValue = value
-				if (toDate) {
-					finalValue = new Date(finalValue)
+				if (inputsType.value[path] === 'multiple-checkboxes') {
+					const prevValue = get(unref(dataRef), path, null)
+					const arrValues = prevValue || []
+					const { value: realValue, checked } = value
+					if (checked && arrValues.indexOf(realValue) < 0) {
+						arrValues.push(realValue)
+					} else if (!checked) {
+						const index = arrValues.indexOf(realValue)
+						if (index >= 0) {
+							arrValues.splice(index, 1)
+						}
+					}
+					set(unref(dataRef), path, arrValues)
+				} else {
+					let finalValue = value
+
+					if (toDate) {
+						finalValue = new Date(finalValue)
+					}
+					if (toNumber) {
+						const number = parseFloat(finalValue)
+						finalValue = Number.isNaN(number) ? finalValue : number
+					}
+					if (transform) {
+						finalValue = transform(finalValue)
+					}
+					set(unref(dataRef), path, finalValue)
 				}
-				if (toNumber) {
-					const number = parseFloat(finalValue)
-					finalValue = Number.isNaN(number) ? finalValue : number
-				}
-				if (transform) {
-					finalValue = transform(finalValue)
-				}
-				set(unref(dataRef), path, finalValue)
+
 				fieldsDirty.value[path] = true
 				isDirty.value = true
 
@@ -170,6 +188,22 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 	const registerRefs = shallowRef<
 		Partial<Record<Path<TData>, RegisterField<TData, Path<TData>>>>
 	>({})
+	const inputsType = shallowRef({} as Partial<Record<string, InputType>>)
+
+	const fieldRefs = shallowRef<Partial<Record<Path<TData>, any>>>({})
+	const multipleFieldRefs = shallowRef<Partial<Record<Path<TData>, any[]>>>({})
+
+	const unregisterField = <TPath extends Path<TData>>(path: TPath) => {
+		errors.value[path] = null
+		fieldsDirty.value[path] = false
+		fieldsTouch.value[path] = false
+		registerRefs.value[path] = null
+		inputsType.value[path] = undefined
+		fieldRefs.value[path] = null
+		multipleFieldRefs.value[path] = null
+		set(unref(dataRef), path, undefined)
+	}
+
 	const useField = <TPath extends Path<TData>>(
 		path: TPath,
 		options?: FieldOptions<PathValue<TData, TPath>>,
@@ -179,14 +213,63 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 		}
 
 		const model = getFieldModel(path, options)
+		inputsType.value[path] = 'text'
 
 		// ref control
 		const refFn = (node: any) => {
-			fieldRefs.value[path] = node
+			if (!node) {
+				unregisterField(path)
+			}
+
+			const checkboxOrRadio = isCheckboxOrRadio(node)
+
+			if (!checkboxOrRadio && fieldRefs.value[path] === node) {
+				return
+			}
+			if (
+				checkboxOrRadio &&
+				multipleFieldRefs.value[path] &&
+				multipleFieldRefs.value[path].indexOf(node) >= 0
+			) {
+				return
+			}
+
+			if (!checkboxOrRadio) {
+				fieldRefs.value[path] = node
+			}
+
+			if (checkboxOrRadio) {
+				multipleFieldRefs.value[path] = multipleFieldRefs.value[path] || []
+				multipleFieldRefs.value[path].push(node)
+			}
+
+			if (node instanceof HTMLInputElement) {
+				const type = node.type
+				if (type === 'checkbox') {
+					if (inputsType.value[path] === 'checkbox') {
+						inputsType.value[path] = 'multiple-checkboxes'
+					} else {
+						inputsType.value[path] = 'checkbox'
+					}
+				}
+			}
 		}
 
-		const oninput = (event: Event) =>
-			(model.value = (event.target as HTMLInputElement).value as any)
+		const oninput = (event: Event) => {
+			const isCheckedbox = (event.target as HTMLInputElement).type === 'checkbox'
+			if (isCheckedbox) {
+				if (inputsType.value[path] === 'multiple-checkboxes') {
+					model.value = {
+						checked: (event.target as HTMLInputElement).checked,
+						value: (event.target as HTMLInputElement).value,
+					} as any
+				} else {
+					model.value = (event.target as HTMLInputElement).checked as any
+				}
+			} else {
+				model.value = (event.target as HTMLInputElement).value as any
+			}
+		}
 
 		const onblur = () => {
 			if (
@@ -208,6 +291,7 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			oninput,
 			onblur,
 			onfocus,
+			checked: model,
 		})
 
 		return registerRefs.value[path]

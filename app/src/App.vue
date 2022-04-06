@@ -16,11 +16,15 @@ const schema = z.object({
 			level: z.number().min(-10).max(10),
 		}),
 	),
+	agree: z.boolean(),
+	checkedNames: z.array(z.string()),
 })
 
 const { useField, errors, useArrayField, handleSubmit, formState } = useZodForm(schema, {
 	defaultValues: {
+		agree: true,
 		name: 'New Name',
+		checkedNames: [],
 	},
 })
 const { fields, append, useFieldAtIndex } = useArrayField('skills')
@@ -34,7 +38,7 @@ const appendHandler = () => {
 <template>
 	<form @submit.prevent="submit">
 		<div>
-			<AppInput type="text" v-bind="useField('name')" />
+			<input type="text" v-bind="useField('name')" />
 			<span v-if="errors.name">{{ errors.name.message }}</span>
 		</div>
 		<div>
@@ -63,6 +67,20 @@ const appendHandler = () => {
 			}}</span>
 		</div>
 		<div><button @click.prevent="appendHandler">appendHandler</button></div>
+
+		<div>
+			<input id="agree" type="checkbox" v-bind="useField('agree')" />
+			<label for="agree">Agree</label>
+			<span v-if="errors.agree">{{ errors.agree.message }}</span>
+		</div>
+
+		<div>
+			<input id="jack" type="checkbox" v-bind="useField('checkedNames')" value="Jack" />
+			<label for="jack">Jack</label>
+			<input id="john" type="checkbox" v-bind="useField('checkedNames')" value="John" />
+			<label for="john">John</label>
+			<span v-if="errors.checkedNames">{{ errors.checkedNames.message }}</span>
+		</div>
 
 		<button type="submit" :disabled="formState.isSubmitting">Submit</button>
 	</form>
