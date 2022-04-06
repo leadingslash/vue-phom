@@ -11,7 +11,7 @@ import { isCheckboxOrRadio } from './utils/input_type'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 type ValidateType = 'submit' | 'change' | 'blur'
-type InputType = 'text' | 'checkbox' | 'multiple-checkboxes'
+type InputType = 'text' | 'checkbox' | 'multiple-checkboxes' | 'multiple-select'
 
 interface RegisterField<TData extends AnyDataType, TPath extends Path<TData>> {
 	value: PathValue<TData, TPath>
@@ -253,22 +253,31 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 					}
 				}
 			}
+
+			if (node instanceof HTMLSelectElement && node.multiple) {
+				inputsType.value[path] = 'multiple-select'
+			}
 		}
 
 		const oninput = (event: Event) => {
-			const isCheckedbox = (event.target as HTMLInputElement).type === 'checkbox'
-			if (isCheckedbox) {
-				if (inputsType.value[path] === 'multiple-checkboxes') {
-					model.value = {
-						checked: (event.target as HTMLInputElement).checked,
-						value: (event.target as HTMLInputElement).value,
-					} as any
-				} else {
-					model.value = (event.target as HTMLInputElement).checked as any
-				}
-			} else {
-				model.value = (event.target as HTMLInputElement).value as any
+			if (inputsType.value[path] === 'multiple-checkboxes') {
+				model.value = {
+					checked: (event.target as HTMLInputElement).checked,
+					value: (event.target as HTMLInputElement).value,
+				} as any
+				return
 			}
+			if (inputsType.value[path] === 'checkbox') {
+				model.value = (event.target as HTMLInputElement).checked as any
+				return
+			}
+			if (inputsType.value[path] === 'multiple-select') {
+				const target = event.target as HTMLSelectElement
+				const options = Array.from(target.selectedOptions).map((option) => option.value)
+				// model.value = options as any
+				return
+			}
+			model.value = (event.target as HTMLInputElement).value as any
 		}
 
 		const onblur = () => {

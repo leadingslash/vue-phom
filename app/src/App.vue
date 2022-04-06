@@ -8,6 +8,7 @@ const schema = z.object({
 	age: z.number().min(18),
 	data: z.object({
 		additionalInfo: z.string().min(16),
+		city: z.string(),
 	}),
 	skills: z.array(
 		z.object({
@@ -47,6 +48,16 @@ const appendHandler = () => {
 		</div>
 		<div>
 			<AppInput type="text" v-bind="useField('data.additionalInfo')" />
+			<span v-if="errors['data.additionalInfo']">{{
+				errors['data.additionalInfo'].message
+			}}</span>
+		</div>
+		<div>
+			<select v-bind="useField('data.city')" multiple>
+				<option>A</option>
+				<option>B</option>
+				<option>C</option>
+			</select>
 			<span v-if="errors['data.additionalInfo']">{{
 				errors['data.additionalInfo'].message
 			}}</span>
