@@ -13,5 +13,5 @@ const inputHandler = (event: Event) => {
 </script>
 
 <template>
-	<input :value="modelValue" type="text" @input="inputHandler" />
+	<input :value="modelValue" @input="inputHandler" />
 </template>

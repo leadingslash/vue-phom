@@ -11,6 +11,14 @@ import { debounce } from './utils/debounce'
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 type ValidateType = 'submit' | 'change' | 'blur'
 
+interface RegisterField<TData extends AnyDataType, TPath extends Path<TData>> {
+	value: PathValue<TData, TPath>
+	ref: (node: any) => void
+	oninput: (event: Event) => void
+	onblur: (event: Event) => void
+	onfocus: (event: Event) => void
+}
+
 type AnyDataType = Record<string, unknown>
 export type ValidationResolver<TData extends AnyDataType> = (
 	data: TData,
@@ -159,10 +167,17 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 		return readonly(computed<PathValue<TData, TPath>>(() => get(unref(dataRef), path, null)))
 	}
 
+	const registerRefs = shallowRef<
+		Partial<Record<Path<TData>, RegisterField<TData, Path<TData>>>>
+	>({})
 	const useField = <TPath extends Path<TData>>(
 		path: TPath,
 		options?: FieldOptions<PathValue<TData, TPath>>,
-	) => {
+	): RegisterField<TData, TPath> => {
+		if (registerRefs.value[path]) {
+			return registerRefs.value[path]
+		}
+
 		const model = getFieldModel(path, options)
 
 		// ref control
@@ -187,13 +202,15 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			fieldsTouch.value[path] = true
 		}
 
-		return reactive({
+		registerRefs.value[path] = reactive({
 			value: model,
 			ref: refFn,
 			oninput,
 			onblur,
 			onfocus,
 		})
+
+		return registerRefs.value[path]
 	}
 
 	const useArrayField = <TPath extends Path<TData>>(path: TPath) => {

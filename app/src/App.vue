@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useZodForm } from './zod_form'
 import { z } from 'zod'
+import AppInput from './components/AppInput.vue'
 
 const schema = z.object({
 	name: z.string().min(4),
@@ -33,26 +34,26 @@ const appendHandler = () => {
 <template>
 	<form @submit.prevent="submit">
 		<div>
-			<input type="text" v-bind="useField('name')" />
+			<AppInput type="text" v-bind="useField('name')" />
 			<span v-if="errors.name">{{ errors.name.message }}</span>
 		</div>
 		<div>
-			<input type="number" v-bind="useField('age', { toNumber: true })" />
+			<AppInput type="number" v-bind="useField('age', { toNumber: true })" />
 			<span v-if="errors.age">{{ errors.age.message }}</span>
 		</div>
 		<div>
-			<input type="text" v-bind="useField('data.additionalInfo')" />
+			<AppInput type="text" v-bind="useField('data.additionalInfo')" />
 			<span v-if="errors['data.additionalInfo']">{{
 				errors['data.additionalInfo'].message
 			}}</span>
 		</div>
 
 		<div v-for="(field, index) in fields" :key="field.id">
-			<input v-bind="useFieldAtIndex(index, 'skill')" :key="field.id" type="text" />
+			<AppInput v-bind="useFieldAtIndex(index, 'skill')" :key="field.id" type="text" />
 			<span v-if="errors[`skills.${index}.skill`]">{{
 				errors[`skills.${index}.skill`]?.message
 			}}</span>
-			<input
+			<AppInput
 				v-bind="useFieldAtIndex(index, 'level', { toNumber: true })"
 				:key="field.id"
 				type="number"
