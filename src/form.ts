@@ -7,7 +7,8 @@ import type { Path, PathValue } from './types/paths'
 import type { WritableComputedRef } from 'vue'
 import type { ArrayValue } from './types/common'
 import { debounce } from './utils/debounce'
-import { isCheckboxOrRadio } from './utils/input_type'
+import { isCheckboxOrRadio, isMultipleSelect } from './utils/input_type'
+import { selectValues } from './utils/multiple_select'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 type ValidateType = 'submit' | 'change' | 'blur'
@@ -170,6 +171,10 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 						finalValue = transform(finalValue)
 					}
 					set(unref(dataRef), path, finalValue)
+
+					if (inputsType.value[path] === 'multiple-select') {
+						selectValues(fieldRefs.value[path], finalValue)
+					}
 				}
 
 				fieldsDirty.value[path] = true
@@ -222,7 +227,14 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			}
 
 			const checkboxOrRadio = isCheckboxOrRadio(node)
+			const multipleSelect = isMultipleSelect(node)
 
+			if (multipleSelect) {
+				inputsType.value[path] = 'multiple-select'
+
+				const values = model.value
+				selectValues(node, values)
+			}
 			if (!checkboxOrRadio && fieldRefs.value[path] === node) {
 				return
 			}
@@ -253,10 +265,6 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 					}
 				}
 			}
-
-			if (node instanceof HTMLSelectElement && node.multiple) {
-				inputsType.value[path] = 'multiple-select'
-			}
 		}
 
 		const oninput = (event: Event) => {
@@ -274,7 +282,7 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			if (inputsType.value[path] === 'multiple-select') {
 				const target = event.target as HTMLSelectElement
 				const options = Array.from(target.selectedOptions).map((option) => option.value)
-				// model.value = options as any
+				model.value = options as any
 				return
 			}
 			model.value = (event.target as HTMLInputElement).value as any

@@ -8,7 +8,7 @@ const schema = z.object({
 	age: z.number().min(18),
 	data: z.object({
 		additionalInfo: z.string().min(16),
-		city: z.string(),
+		city: z.string().array(),
 	}),
 	skills: z.array(
 		z.object({
@@ -26,6 +26,9 @@ const { useField, errors, useArrayField, handleSubmit, formState } = useZodForm(
 		agree: true,
 		name: 'New Name',
 		checkedNames: [],
+		data: {
+			city: ['A', 'B'],
+		},
 	},
 })
 const { fields, append, useFieldAtIndex } = useArrayField('skills')
