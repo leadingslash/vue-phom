@@ -35,14 +35,8 @@ export type ValidationError = {
 	code: string
 }
 
-export type ValidationErrors<
-	TData extends AnyDataType,
-	TPath extends Path<TData> = Path<TData>,
-> = Partial<
-	Record<
-		Path<TData>,
-		PathValue<TData, TPath> extends Array<any> ? ValidationError[] : ValidationError
-	>
+export type ValidationErrors<TData extends AnyDataType> = Partial<
+	Record<Path<TData>, ValidationError>
 >
 
 export const useForm = <TData extends AnyDataType, TDefaultData extends TData = TData>(
@@ -120,7 +114,6 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			const validateErrors = await validation(data)
 			if (validateErrors) {
 				errors.value = validateErrors
-				console.log(errors.value)
 				return false
 			} else {
 				errors.value = {}
@@ -132,36 +125,34 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 
 	const dataRef = ref<TData>({ ...defaultValues } as TData)
 	const fieldRefs = shallowRef<Partial<Record<Path<TData>, any>>>({})
-	const modelRefs = shallowRef<Partial<Record<Path<TData>, any>>>({})
 
 	const getFieldModel = <TPath extends Path<TData>>(
 		path: TPath,
 		options?: FieldOptions<PathValue<TData, TPath>>,
 	): WritableComputedRef<PathValue<TData, TPath>> => {
-		if (!modelRefs.value[path]) {
-			const { toDate, toNumber, transform } = options ?? {}
-			modelRefs.value[path] = computed<PathValue<TData, TPath>>({
-				get: () => get(unref(dataRef), path, null),
-				set: (value: any) => {
-					let finalValue = value
-					if (toDate) {
-						finalValue = new Date(finalValue)
-					}
-					if (toNumber) {
-						finalValue = Number(finalValue)
-					}
-					if (transform) {
-						finalValue = transform(finalValue)
-					}
-					set(unref(dataRef), path, finalValue)
-					fieldsDirty.value[path] = true
-					isDirty.value = true
+		const { toDate, toNumber, transform } = options ?? {}
+		const field = computed<PathValue<TData, TPath>>({
+			get: () => get(unref(dataRef), path, null),
+			set: (value: any) => {
+				let finalValue = value
+				if (toDate) {
+					finalValue = new Date(finalValue)
+				}
+				if (toNumber) {
+					const number = parseFloat(finalValue)
+					finalValue = Number.isNaN(number) ? finalValue : number
+				}
+				if (transform) {
+					finalValue = transform(finalValue)
+				}
+				set(unref(dataRef), path, finalValue)
+				fieldsDirty.value[path] = true
+				isDirty.value = true
 
-					debounceOnChangeValidate()
-				},
-			})
-		}
-		return modelRefs.value[path]
+				debounceOnChangeValidate()
+			},
+		})
+		return field
 	}
 
 	const watchField = <TPath extends Path<TData>>(path: TPath) => {
@@ -205,10 +196,6 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 		})
 	}
 
-	const useError = <TPath extends Path<TData>>(path: TPath) => {
-		return computed<ValidationErrors<TData, TPath>[TPath]>(() => unref(errors)[path] ?? null)
-	}
-
 	const useArrayField = <TPath extends Path<TData>>(path: TPath) => {
 		const model = getFieldModel(path)
 		const castModel = model as WritableComputedRef<Array<any>>
@@ -237,7 +224,13 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			return useField(`${path}.${index}.${subPath}` as any, options)
 		}
 
-		return { append, prepend, remove, fields: watchField(path), useFieldAtIndex }
+		return {
+			append,
+			prepend,
+			remove,
+			fields: watchField(path),
+			useFieldAtIndex,
+		}
 	}
 
 	const handleSubmit =
@@ -261,5 +254,13 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			}
 		}
 
-	return { handleSubmit, formState, reset, useField, useError, useArrayField, watchField }
+	return {
+		handleSubmit,
+		formState,
+		reset,
+		useField,
+		useArrayField,
+		watchField,
+		errors: readonly(errors),
+	}
 }
