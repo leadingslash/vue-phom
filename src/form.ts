@@ -12,7 +12,13 @@ import { selectValues } from './utils/multiple_select'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 type ValidateType = 'submit' | 'change' | 'blur'
-type InputType = 'text' | 'checkbox' | 'multiple-checkboxes' | 'multiple-select'
+type InputType =
+	| 'text'
+	| 'checkbox'
+	| 'multiple-checkboxes'
+	| 'multiple-select'
+	| 'radio'
+	| 'multiple-radio'
 
 interface RegisterField<TData extends AnyDataType, TPath extends Path<TData>> {
 	value: PathValue<TData, TPath>
@@ -235,6 +241,14 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 				const values = model.value
 				selectValues(node, values)
 			}
+			if (checkboxOrRadio) {
+				const value = model.value
+				if (Array.isArray(value)) {
+					node.checked = value.indexOf(node.value) >= 0
+				} else {
+					node.checked = String(node.value) === String(value) && !!value
+				}
+			}
 			if (!checkboxOrRadio && fieldRefs.value[path] === node) {
 				return
 			}
@@ -262,6 +276,13 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 						inputsType.value[path] = 'multiple-checkboxes'
 					} else {
 						inputsType.value[path] = 'checkbox'
+					}
+				}
+				if (type === 'radio') {
+					if (inputsType.value[path] === 'radio') {
+						inputsType.value[path] = 'multiple-radio'
+					} else {
+						inputsType.value[path] = 'radio'
 					}
 				}
 			}
@@ -308,7 +329,6 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 			oninput,
 			onblur,
 			onfocus,
-			checked: model,
 		})
 
 		return registerRefs.value[path]

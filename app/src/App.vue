@@ -19,16 +19,18 @@ const schema = z.object({
 	),
 	agree: z.boolean(),
 	checkedNames: z.array(z.string()),
+	gender: z.string(),
 })
 
 const { useField, errors, useArrayField, handleSubmit, formState } = useZodForm(schema, {
 	defaultValues: {
 		agree: true,
 		name: 'New Name',
-		checkedNames: [],
+		checkedNames: ['John'],
 		data: {
 			city: ['A', 'B'],
 		},
+		gender: 'Male',
 	},
 })
 const { fields, append, useFieldAtIndex } = useArrayField('skills')
@@ -94,6 +96,14 @@ const appendHandler = () => {
 			<input id="john" type="checkbox" v-bind="useField('checkedNames')" value="John" />
 			<label for="john">John</label>
 			<span v-if="errors.checkedNames">{{ errors.checkedNames.message }}</span>
+		</div>
+
+		<div>
+			<input id="one" v-bind="useField('gender')" type="radio" value="Male" />
+			<label for="one">Male</label>
+
+			<input id="two" v-bind="useField('gender')" type="radio" value="Female" />
+			<label for="two">Female</label>
 		</div>
 
 		<button type="submit" :disabled="formState.isSubmitting">Submit</button>
