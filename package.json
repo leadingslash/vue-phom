@@ -1,7 +1,15 @@
 {
 	"name": "vue-phom",
-	"version": "0.1.0",
-	"description": "",
+	"version": "0.1.1",
+	"description": "Simple vue form controller.",
+	"homepage": "https://github.com/suppayami/vue-phom",
+	"bugs": {
+		"url": "https://github.com/suppayami/vue-phom/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/suppayami/vue-phom.git"
+	},
 	"scripts": {
 		"build": "rimraf dist && unbuild",
 		"dev": "./scripts/dev_app.sh",
@@ -10,8 +18,8 @@
 		"release": "bumpp --commit --push --tag && npm publish",
 		"prepublishOnly": "npm run build"
 	},
-	"author": "Dr.Yami",
-	"license": "TBD",
+	"author": "Dr.Yami <dr.yami.moe@gmail.com>",
+	"license": "MIT",
 	"main": "dist/index.cjs",
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
