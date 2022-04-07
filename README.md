@@ -101,5 +101,46 @@ const submit = handleSubmit((data) => console.log(data))
         <button type="submit" :disabled="formState.isSubmitting">Submit</button>
     </form>
 </template>
+```
 
+## Radio & Checkbox
+
+Radio and checkbox are supported by default. Multiple checkboxes will result in an array of values.
+
+```vue
+<template>
+    <form>
+        <div>
+            <input id="agree" type="checkbox" v-bind="useField('agree')" />
+            <label for="agree">Agree</label>
+        </div>
+
+        <div>
+            <input id="jack" type="checkbox" v-bind="useField('checkedNames')" value="Ram" />
+			<label for="jack">Ram</label>
+			<input id="john" type="checkbox" v-bind="useField('checkedNames')" value="Rem" />
+			<label for="john">Rem</label>
+        </div>
+
+        <div>
+            <input id="one" v-bind="useField('job')" type="radio" value="Developer" />
+			<label for="one">Developer</label>
+
+			<input id="two" v-bind="useField('job')" type="radio" value="Manager" />
+			<label for="two">Manager</label>
+        </div>
+    </form>
+</template>
+```
+
+## Select & Multiple Select
+
+```vue
+<template>
+    <select v-bind="useField('city')" multiple>
+        <option>Helsinki</option>
+        <option>Hanoi</option>
+        <option>Paris</option>
+    </select>
+</template>
 ```
