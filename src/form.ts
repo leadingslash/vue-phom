@@ -7,8 +7,7 @@ import type { Path, PathValue } from './types/paths'
 import type { WritableComputedRef } from 'vue'
 import type { ArrayValue } from './types/common'
 import { debounce } from './utils/debounce'
-import { isCheckboxOrRadio, isMultipleSelect } from './utils/input_type'
-import { selectValues } from './utils/multiple_select'
+import { checkValues, isCheckboxOrRadio, isMultipleSelect, selectValues } from './utils/input_type'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 type ValidateType = 'submit' | 'change' | 'blur'
@@ -242,12 +241,7 @@ export const useForm = <TData extends AnyDataType, TDefaultData extends TData = 
 				selectValues(node, values)
 			}
 			if (checkboxOrRadio) {
-				const value = model.value
-				if (Array.isArray(value)) {
-					node.checked = value.indexOf(node.value) >= 0
-				} else {
-					node.checked = String(node.value) === String(value) && !!value
-				}
+				checkValues(node, model.value)
 			}
 			if (!checkboxOrRadio && fieldRefs.value[path] === node) {
 				return

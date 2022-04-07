@@ -2,6 +2,7 @@
 import { useZodForm } from './zod_form'
 import { z } from 'zod'
 import AppInput from './components/AppInput.vue'
+import { ref } from 'vue'
 
 const schema = z.object({
 	name: z.string().min(4),
@@ -35,7 +36,11 @@ const { useField, errors, useArrayField, handleSubmit, formState } = useZodForm(
 })
 const { fields, append, useFieldAtIndex } = useArrayField('skills')
 
-const submit = handleSubmit((data) => console.log(data))
+const submitCount = ref(0)
+const submit = handleSubmit((data) => {
+	console.log(data)
+	submitCount.value++
+})
 const appendHandler = () => {
 	append({ id: `${Date.now()}`, skill: 'New Skill', level: 0 })
 }
@@ -43,6 +48,7 @@ const appendHandler = () => {
 
 <template>
 	<form @submit.prevent="submit">
+		Submit count: {{ submitCount }}
 		<div>
 			<input type="text" v-bind="useField('name')" />
 			<span v-if="errors.name">{{ errors.name.message }}</span>
