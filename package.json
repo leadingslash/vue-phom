@@ -6,7 +6,9 @@
 		"build": "rimraf dist && unbuild",
 		"dev": "./scripts/dev_app.sh",
 		"lint": "eslint . --ext .vue,.ts,.tsx",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"release": "bumpp --commit --push --tag && npm publish",
+		"prepublishOnly": "npm run build"
 	},
 	"author": "Dr.Yami",
 	"license": "TBD",
@@ -30,6 +32,7 @@
 		"@types/lodash-es": "^4.17.6",
 		"@vue/eslint-config-prettier": "^7.0.0",
 		"@vue/eslint-config-typescript": "^10.0.0",
+		"bumpp": "^7.1.1",
 		"eslint": "^8.5.0",
 		"eslint-plugin-vue": "^8.5.0",
 		"prettier": "^2.5.1",
