@@ -10,6 +10,11 @@ This project is in experimental phase, use at your own risk. All the API and imp
 -   Run `yarn dev` to run dev app
 -   Run `yarn build` to build dist
 
+## TODO
+
+-   Controlled input, for custom/3rd party input components
+-   Validation for popular libraries
+
 ## Getting started
 
 ```vue
@@ -65,8 +70,8 @@ const appendHandler = () => {
 </template>
 ```
 
-
 ## Validation
+
 Check `app/src/zod_form.ts` for validation implementation.
 
 ```vue
