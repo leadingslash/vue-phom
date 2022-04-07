@@ -117,17 +117,17 @@ Radio and checkbox are supported by default. Multiple checkboxes will result in 
 
         <div>
             <input id="jack" type="checkbox" v-bind="useField('checkedNames')" value="Ram" />
-			<label for="jack">Ram</label>
-			<input id="john" type="checkbox" v-bind="useField('checkedNames')" value="Rem" />
-			<label for="john">Rem</label>
+            <label for="jack">Ram</label>
+            <input id="john" type="checkbox" v-bind="useField('checkedNames')" value="Rem" />
+            <label for="john">Rem</label>
         </div>
 
         <div>
             <input id="one" v-bind="useField('job')" type="radio" value="Developer" />
-			<label for="one">Developer</label>
+            <label for="one">Developer</label>
 
-			<input id="two" v-bind="useField('job')" type="radio" value="Manager" />
-			<label for="two">Manager</label>
+            <input id="two" v-bind="useField('job')" type="radio" value="Manager" />
+            <label for="two">Manager</label>
         </div>
     </form>
 </template>
