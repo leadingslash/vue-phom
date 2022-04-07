@@ -4,6 +4,10 @@
 
 This project is in experimental phase, use at your own risk. All the API and implementation might change in the future release.
 
+## Install
+
+`npm i vue-phom`
+
 ## Development Guide
 
 -   Run `yarn && cd app && yarn && cd ..` to setup deps
